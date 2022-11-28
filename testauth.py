@@ -103,6 +103,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print (payload)
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -117,6 +118,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     #if current_user.disabled:
         #raise HTTPException(status_code=400, detail="Inactive user")
+    print(current_user)
     return current_user
 
 @app.post("/token", tags=['Auth'], response_model=Token)
