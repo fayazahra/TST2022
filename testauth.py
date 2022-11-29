@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI()
 connect(db="tst", host="localhost", port=27017)
@@ -140,3 +141,6 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/users/me/", tags=['Auth'], response_model=User)
 async def read_current_user(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+#if __name__ == "__main__":
+#   uvicorn.run(host="0.0.0.0", debug=True, port="5000")
