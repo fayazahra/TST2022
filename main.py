@@ -1,6 +1,10 @@
 import json
+import pickle
+import uvicorn
+#from server.auth.jwt_handler import verify_token
+#import sklearn
 from models import User as UserDB
-from models import NewUser
+from models import User, model_input
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
@@ -10,15 +14,10 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
-import uvicorn
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
 
 app = FastAPI()
 
-connect = MongoClient('mongodb+srv://asteresrh:<password>@tubestst.7ao78nq.mongodb.net/test')
+connect = MongoClient('mongodb+srv://asteresrh:F4iruzzz@tubestst.1iohpll.mongodb.net/test')
 db = connect.tst
 user123 = db['user']
 
@@ -32,13 +31,13 @@ def home():
 
 @app.get("/getUsers")
 def getUsers():
-    user = json.loads(UserDB.objects().to_json())
+    user = json.loads(User.objects().to_json())
 
     return {"users": user}
 
 @app.post("/register")
-def register(new_user: NewUser):
-    user = UserDB(username = new_user.username,
+def register(new_user: User):
+    user = User(username = new_user.username,
                 password = new_user.password)
     user.save()
 
@@ -83,7 +82,7 @@ def get_user(db, username: str):
             return user
 
 def authenticate_user(user_db, username: str, password: str):
-    user = get_user(UserDB.objects(), username)
+    user = get_user(User.objects(), username)
     if not user:
         return False
     #if not verify_password(password, user.hashed_password):
@@ -116,7 +115,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(UserDB.objects(), username=token_data.username)
+    user = get_user(User.objects(), username=token_data.username)
     if user is None:
         raise credentials_exception
     return {"user": user }
@@ -129,7 +128,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 @app.post("/token", tags=['Auth'], response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(UserDB.objects, form_data.username, form_data.password)
+    user = authenticate_user(User.objects, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -147,7 +146,34 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def read_current_user(current_user: User = Depends(get_current_active_user)):
     return current_user
 
-#@app.post('/recommend')
+#loading model
+diabetes_model = pickle.load(open('diabetes_model.sav','rb'))
+
+@app.post('/Diabetes_Prediction')
+def diabetes_pred(input_parameter : model_input):
+
+    input_data = input_parameter.json()
+    input_dictionary = json.loads(input_data)
+
+    preg = input_dictionary['Pregnancies']
+    glu = input_dictionary['Glucose']
+    bp = input_dictionary['BloodPressure']
+    skin = input_dictionary['SkinThickness']
+    ins = input_dictionary['Insulin']
+    bmi = input_dictionary['BMI']
+    dpf = input_dictionary['DiabetesPedigreeFunction']
+    age = input_dictionary['Age']
+
+    input_list = [preg, glu, bp, skin, ins, bmi, dpf, age]
+
+    prediction = diabetes_model.predict([input_list])
+
+    if (prediction[0] == 0):
+        return 'Not Diabetic'
+    else:
+        return 'Diabetic'
+
+
 
 #if __name__ == "__main__":
 #  uvicorn.run("main:app", host="0.0.0.0", reload=True, port="8080")

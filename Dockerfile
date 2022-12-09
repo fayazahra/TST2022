@@ -20,4 +20,5 @@ COPY . /app
 #USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python", "testauth.py", "app.testauth:app", "--host", "0.0.0.0", "--port", "5000", "--reload", "uvicorn"]
+EXPOSE 8080
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

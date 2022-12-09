@@ -1,12 +1,8 @@
-#!/Users/faizakamilah/gh-repos/TST2022/venv/bin/python
-# EASY-INSTALL-ENTRY-SCRIPT: 'jose==1.0.0','console_scripts','jose'
-__requires__ = 'jose==1.0.0'
+#!/Users/faizakamilah/gh-repos/TST2022-1/venv/bin/python3
+# -*- coding: utf-8 -*-
 import re
 import sys
-from pkg_resources import load_entry_point
-
+from jose import _cli
 if __name__ == '__main__':
-    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
-    sys.exit(
-        load_entry_point('jose==1.0.0', 'console_scripts', 'jose')()
-    )
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(_cli())
